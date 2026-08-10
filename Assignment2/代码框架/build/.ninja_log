@@ -1,0 +1,5 @@
+# ninja log v7
+40	1379	8080803080761020	CMakeFiles/Rasterizer.dir/Triangle.cpp.obj	f8f46bbb311163fe
+24	2538	8080803080604121	CMakeFiles/Rasterizer.dir/main.cpp.obj	f5ec84baffc1300d
+33	2888	8080803080691918	CMakeFiles/Rasterizer.dir/rasterizer.cpp.obj	170b421138ff3544
+2888	3113	8080803109231717	Rasterizer.exe	c9b4a59cc17f4036

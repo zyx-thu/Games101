@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "MSYS2",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:/msys2/mingw64/include/opencv4",
+                "D:/msys2/mingw64/include/eigen3"
+            ],
+            "intelliSenseMode": "windows-gcc-x64",
+            "compilerPath": "D:/msys2/mingw64/bin/g++.exe"
+        }
+    ],
+    "version": 4
+}
