@@ -50,7 +50,24 @@ Eigen::Matrix4f get_model_matrix(float angle)
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
     // TODO: Use the same projection matrix from the previous assignments
-
+    Eigen::Matrix4f projection;
+    projection = Eigen::Matrix4f::Identity();
+    double radian = eye_fov / 180 * acos(-1);
+    float t, b, l, r;
+    t = zNear * tan(radian/2);
+    b = -t;
+    r = aspect_ratio * t;
+    l = -r;
+    Eigen::Matrix4f A;
+    A << zNear, 0, 0, 0, 0, zNear, 0, 0, 0, 0, zNear + zFar, zNear * zFar,
+        0, 0, -1, 0;
+    Eigen::Matrix4f B;
+    Eigen::Matrix4f B1, B2;
+    B1 << 1,0,0,0,0,1,0,0,0,0,1,(zFar+zNear)/2,0,0,0,1;
+    B2 << 1/r,0,0,0,0,1/t,0,0,0,0,2/(zNear-zFar),0,0,0,0,1;
+    B = B2 * B1;
+    projection = B * A * projection;
+    return projection;
 }
 
 Eigen::Vector3f vertex_shader(const vertex_shader_payload& payload)
@@ -112,7 +129,8 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     {
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
-
+        auto 
+        auto eye = 
     }
 
     return result_color * 255.f;
@@ -142,7 +160,17 @@ Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
     {
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
-        
+        //算几个关键的方向
+        auto light_pos = (light.position - point).normlized(); //光照方向
+        auto eye = (eye_pos - point).normlized();
+        auto half_pos = (light_pos + eye).normlized();
+        //先算漫反射
+        auto diffuse = 500 * math::DotV3(max(math::DotV3(normal, light_pos), 0), kd);
+        //再算高光
+        auto specular = 500 * math::DotV3(ks, max(math::DotV3(normal, half_pos), 0));
+        //再算环境光
+        auto ambient = math::DotV3(amb_light_intensity, ka);
+        result_color += (difffuse + specular + ambient);
     }
 
     return result_color * 255.f;
