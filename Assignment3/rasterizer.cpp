@@ -286,13 +286,13 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eig
                     depth_buf[index] = z_interpolated;
                     //这一步说明这个点可以插值其他属性来计算了，下面原来的简单颜色就不需要了
                     //set_pixel(Eigen::Vector3f(float(i), float(j), 1.0f), t.getColor());
-                    auto interpolated_color = alpha * t.color[0] / v[0].w() +  beta * t.color[1] / v[1].w() + gamma * t.color[2] / v[2].w();
+                    Eigen::Vector3f interpolated_color = alpha * t.color[0] / v[0].w() +  beta * t.color[1] / v[1].w() + gamma * t.color[2] / v[2].w();
                     interpolated_color *= w_reciprocal;
-                    auto interpolated_normal = alpha * t.normal[0] / v[0].w() +  beta * t.normal[1] / v[1].w() + gamma * t.normal[2] / v[2].w();
+                    Eigen::Vector3f interpolated_normal = alpha * t.normal[0] / v[0].w() +  beta * t.normal[1] / v[1].w() + gamma * t.normal[2] / v[2].w();
                     interpolated_normal *= w_reciprocal;
-                    auto interpolated_texcoords = alpha * t.tex_coords[0] / v[0].w() +  beta * t.tex_coords[1] / v[1].w() + gamma * t.tex_coords[2] / v[2].w();
+                    Eigen::Vector2f interpolated_texcoords = alpha * t.tex_coords[0] / v[0].w() +  beta * t.tex_coords[1] / v[1].w() + gamma * t.tex_coords[2] / v[2].w();
                     interpolated_texcoords *= w_reciprocal;
-                    auto interpolated_shadingcoords = alpha * view_pos[0] / v[0].w() +  beta * view_pos[1] / v[1].w() + gamma * view_pos[2] / v[2].w();
+                    Eigen::Vector3f interpolated_shadingcoords = alpha * view_pos[0] / v[0].w() +  beta * view_pos[1] / v[1].w() + gamma * view_pos[2] / v[2].w();
                     interpolated_shadingcoords *= w_reciprocal;
                     fragment_shader_payload payload( interpolated_color, interpolated_normal.normalized(), interpolated_texcoords, texture ? &*texture : nullptr);
                     payload.view_pos = interpolated_shadingcoords;

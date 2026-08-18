@@ -1,6 +1,8 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include "global.hpp"
 #include "rasterizer.hpp"
 #include "Triangle.hpp"
@@ -101,7 +103,7 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     if (payload.texture)
     {
         // TODO: Get the texture value at the texture coordinates of the current fragment
-
+        return_color = payload.texture->getColor(payload.tex_coords.x(), payload.tex_coords.y());
     }
     Eigen::Vector3f texture_color;
     texture_color << return_color.x(), return_color.y(), return_color.z();
@@ -129,10 +131,20 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     {
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
-        auto 
-        auto eye = 
+        //算几个关键的方向
+        auto r_2 = (light.position - point).dot(light.position - point);
+        auto light_pos = (light.position - point).normalized(); //光照方向
+        auto eye = (eye_pos - point).normalized();
+        auto half_pos = (light_pos + eye).normalized();
+        //先算漫反射
+        auto diffuse = kd.cwiseProduct(light.intensity) * std::max(0.0f, normal.dot(light_pos)) / r_2;
+        //再算高光
+        auto specular = ks.cwiseProduct(light.intensity) * std::pow(std::max(0.0f, normal.dot(half_pos)), p) / r_2;
+        result_color += (diffuse + specular);
     }
-
+    //最后再算环境光 注意只能算一次
+    auto ambient = ka.cwiseProduct(amb_light_intensity);
+    result_color += ambient;
     return result_color * 255.f;
 }
 
@@ -158,21 +170,22 @@ Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
     Eigen::Vector3f result_color = {0, 0, 0};
     for (auto& light : lights)
     {
-        // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
+       // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
         //算几个关键的方向
-        auto light_pos = (light.position - point).normlized(); //光照方向
-        auto eye = (eye_pos - point).normlized();
-        auto half_pos = (light_pos + eye).normlized();
+        auto r_2 = (light.position - point).dot(light.position - point);
+        auto light_pos = (light.position - point).normalized(); //光照方向
+        auto eye = (eye_pos - point).normalized();
+        auto half_pos = (light_pos + eye).normalized();
         //先算漫反射
-        auto diffuse = 500 * math::DotV3(max(math::DotV3(normal, light_pos), 0), kd);
+        auto diffuse = kd.cwiseProduct(light.intensity) * std::max(0.0f, normal.dot(light_pos)) / r_2;
         //再算高光
-        auto specular = 500 * math::DotV3(ks, max(math::DotV3(normal, half_pos), 0));
-        //再算环境光
-        auto ambient = math::DotV3(amb_light_intensity, ka);
-        result_color += (difffuse + specular + ambient);
+        auto specular = ks.cwiseProduct(light.intensity) * std::pow(std::max(0.0f, normal.dot(half_pos)), p) / r_2;
+        result_color += (diffuse + specular);
     }
-
+    //最后再算环境光 注意只能算一次
+    auto ambient = ka.cwiseProduct(amb_light_intensity);
+    result_color += ambient;
     return result_color * 255.f;
 }
 
